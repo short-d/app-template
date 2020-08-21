@@ -1,0 +1,142 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: create staging frontend assets
+    image: node:12.7.0-alpine
+    volumes:
+      - name: sampleapp-fe-dep
+        path: /drone/src/web/node_modules
+    commands:
+      - apk add --no-cache bash git
+      - cd web
+      - yarn
+      - CI=true yarn build:staging
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+  - name: create production frontend assets
+    image: node:12.7.0-alpine
+    volumes:
+      - name: sampleapp-fe-dep
+        path: /drone/src/web/node_modules
+    commands:
+      - apk add --no-cache bash git
+      - cd web
+      - yarn
+      - CI=true yarn build:production
+    when:
+      branch:
+        - production
+      event:
+        - push
+
+  - name: build staging web Docker image
+    image: docker
+    commands:
+      - docker build -t sampleapp-web-staging:latest -f web/Dockerfile web
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+  - name: build production web Docker image
+    image: docker
+    commands:
+      - docker build -t sampleapp-web:latest -f web/Dockerfile web
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch:
+        - production
+      event:
+        - push
+
+  - name: build staging backend Docker image
+    image: docker
+    commands:
+      - docker build -t sampleapp-backend:latest -f backend/Dockerfile backend
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+  - name: build production backend Docker image
+    image: docker
+    commands:
+      - docker build -t sampleapp-backend:latest -f backend/Dockerfile backend
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch:
+        - production
+      event:
+        - push
+
+  - name: publish staging images to DockerHub
+    image: docker
+    environment:
+      DOCKERHUB_USERNAME:
+        from_secret: DOCKERHUB_USERNAME
+      DOCKERHUB_PASSWORD:
+        from_secret: DOCKERHUB_PASSWORD
+      DOCKERHUB_ORG_ID:
+        from_secret: DOCKERHUB_ORG_ID
+    commands:
+      - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+      - docker tag sampleapp-web-staging:latest $DOCKERHUB_ORG_ID/sampleapp-web-staging:latest
+      - docker tag sampleapp-backend:latest $DOCKERHUB_ORG_ID/sampleapp-backend-staging:latest
+      - docker push $DOCKERHUB_ORG_ID/sampleapp-web-staging:latest
+      - docker push $DOCKERHUB_ORG_ID/sampleapp-backend-staging:latest
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+  - name: publish production images to DockerHub
+    image: docker
+    environment:
+      DOCKERHUB_USERNAME:
+        from_secret: DOCKERHUB_USERNAME
+      DOCKERHUB_PASSWORD:
+        from_secret: DOCKERHUB_PASSWORD
+      DOCKERHUB_ORG_ID:
+        from_secret: DOCKERHUB_ORG_ID
+    commands:
+      - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+      - docker tag sampleapp-web:latest $DOCKERHUB_ORG_ID/sampleapp-web:latest
+      - docker tag sampleapp-backend:latest $DOCKERHUB_ORG_ID/sampleapp-backend:latest
+      - docker push $DOCKERHUB_ORG_ID/sampleapp-web:latest
+      - docker push $DOCKERHUB_ORG_ID/sampleapp-backend:latest
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch:
+        - production
+      event:
+        - push
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+  - name: sampleapp-fe-dep
+    host:
+      path: /drone/sampleapp-fe-dep
