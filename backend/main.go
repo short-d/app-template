@@ -23,7 +23,7 @@ func main() {
 		DBPort     int    `env:"DB_PORT" default:"5432"`
 		DBUser     string `env:"DB_USER" default:"postgres"`
 		DBPassword string `env:"DB_PASSWORD" default:"password"`
-		DBName     string `env:"DB_NAME" default:"short"`
+		DBName     string `env:"DB_NAME" default:"sampleapp"`
 	}{}
 	err := envConfig.ParseConfigFromEnv(&config)
 	if err != nil {
