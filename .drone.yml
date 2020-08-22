@@ -73,19 +73,6 @@ steps:
       event:
         - push
 
-  - name: build production backend Docker image
-    image: docker
-    commands:
-      - docker build -t sampleapp-backend:latest -f backend/Dockerfile backend
-    volumes:
-      - name: docker
-        path: /var/run/docker.sock
-    when:
-      branch:
-        - production
-      event:
-        - push
-
   - name: publish staging images to DockerHub
     image: docker
     environment:
