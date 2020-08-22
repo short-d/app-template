@@ -15,7 +15,10 @@ const sampleAppGraphQLService = new SampleAppGraphqlService(graphQLService, envS
 
 ReactDOM.render(
   <React.StrictMode>
-    <App sampleAppGraphQLService={sampleAppGraphQLService}/>
+    <App
+      envService={envService}
+      sampleAppGraphQLService={sampleAppGraphQLService}
+    />
   </React.StrictMode>,
   document.getElementById('root')
 );
