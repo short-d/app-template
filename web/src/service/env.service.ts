@@ -1,4 +1,5 @@
 export interface Environment {
+  env: string;
   graphQLBaseURL: string;
 }
 
@@ -7,6 +8,7 @@ export class EnvService {
 
   constructor() {
     this.environment = {
+      env: this.getVal('ENV'),
       graphQLBaseURL: this.getVal('GRAPHQL_API_BASE_URL')
     }
   }
