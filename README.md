@@ -1,6 +1,12 @@
 # AppTemplate
 Launch a new service on Short Cloud in 10 minutes
 
+## New Initiatives
+
+| Project | Status | Impacts | 
+|---------|--------|---------|
+| [Framework CLI](https://api.short-d.com/r/fwcli) | In Progress | All the following manual work will be automated with this CLI!|
+
 ## Getting Started
 
 1. Clone this repo.
