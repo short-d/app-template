@@ -40,6 +40,9 @@ func main() {
 	}
 	dbConnector := dep.InjectDBConnector()
 	sqlDB, err := dbConnector.Connect(dbConfig)
+	if err != nil {
+		panic(err)
+	}
 
 	// Migrate DB tables
 	dbMigrationTool := dep.InjectDBMigrationTool()
